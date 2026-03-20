@@ -1,0 +1,78 @@
+<div align="center">
+  <h1>BreatheFree: Technical Architecture & Presentation Guide</h1>
+  <p>A comprehensive breakdown of the algorithms, tech stack, and systems powering the application.</p>
+</div>
+
+---
+
+## 1. The Core Technology Stack
+
+The BreatheFree application is built on a modern, decoupled architecture designed for high performance, real-time 3D rendering, and instant AI interactions.
+
+### Frontend (Client-Side)
+- **Framework:** React 18 (bootstrapped with Vite for instant HMR and optimized builds)
+- **Styling:** Tailwind CSS (utility-first, responsive, dark-mode native glassmorphism UI)
+- **State Management:** Zustand (lightweight, un-opinionated global state for Auth, User Data, and i18n variables)
+- **Routing:** React Router DOM (Dynamic protected routes and seamless SPA transitions)
+- **Data Visualization:** Recharts (SVG-based reactive components for Area, Pie, and Bar charts in the Analytics Dashboard)
+- **Iconography:** Lucide-React (highly optimized, clean vector icons)
+
+### Backend (Server-Side)
+- **Framework:** FastAPI (Python 3.10+) — chosen for its extreme speed, asynchronous capabilities, and automatic OpenAPI schema generation.
+- **Serverless/ASGI:** Uvicorn (Lightning-fast ASGI server)
+- **Database Layer:** SQLite optimized with SQLAlchemy ORM (handles Relational User profiles, daily logs, and quit plan schemas).
+- **Validation:** Pydantic (Strict payload typing and environment variable parsing)
+- **Authentication:** JWT (JSON Web Tokens) with Argon2/Bcrypt password hashing for secure route protection.
+
+---
+
+## 2. 3D Graphics & Real-Time Visualization
+
+Rather than relying on massive, hard-to-load static 3D models, the platform utilizes **Procedural Generation & Custom Shaders** to visualize real-time internal health.
+
+- **Engine:** Three.js wrapped in React Three Fiber (`@react-three/fiber`) & Drei (`@react-three/drei`).
+- **Mathematical Geometry:** Organs are constructed dynamically using mathematical primitives (e.g., specific combinations of `sphereGeometry`, `capsuleGeometry`, and `cylinderGeometry` seamlessly grouped).
+- **WebGL Shader Injection (`onBeforeCompile`):** We intercept the standard Three.js material compilation pipeline to inject raw GLSL (OpenGL Shading Language) code:
+  - **Vertex Displacement:** For the Brain organ, dynamic algorithms calculate `sin()` and `cos()` wave displacements across vertices to physically simulate and animate organic folding (gyri/sulci).
+  - **Fragment Noise Degradation:** By utilizing pseudo-random 2D Noise functions ([hash()](file:///c:/Users/Abinaya/OneDrive/Desktop/smoking_habit_tracker/backend/utils/auth.py#21-26) and `noise()`) directly on the GPU, the fragment shader layers dynamic texture degradation based on the user's "Damage Percentage". It actively lerps between healthy pink thresholds and darkened, calcified colors.
+  - **Kinematic Animation:** The vertex shaders apply mathematical pulses (`Math.sin(time)`) scaled by the organ type (e.g., double-beat imitation for the heart, expansion-contraction loops for the lungs).
+
+---
+
+## 3. Machine Learning Algorithms (Predictive Health Model)
+
+The biological impact tracker relies on a trained ensemble learning algorithm.
+
+- **Algorithm:** **Random Forest Regressor** (Powered by Scikit-Learn / `joblib`)
+- **Input Features (Parameters):**
+  1. `Age` (Chronological deterioration)
+  2. `Smoking Duration` (Cumulative organ exposure in years)
+  3. `Cigarettes Per Day` (Immediate toxicity load)
+- **Data Pipeline:** The model scales input features via a saved `StandardScaler` (`health_impact_scaler.pkl`), then predicts four unique continuous target variables representing the damage percentage of the Lungs, Heart, Brain, and Liver.
+- **Categorization Logic:** The numerical outputs (0-100%) are mathematically averaged to determine an overarching "Severity Index". This index fundamentally controls the UI coloration, 3D shader parameters (roughness, emissive intensity, displacement scale), and the AI's contextual awareness constraint.
+
+---
+
+## 4. Generative AI Architecture (Gemini Integration)
+
+BreatheFree heavily leans on Large Language Models for cognitive behavioral therapy, substituting static text with dynamic, context-aware reasoning.
+
+### The Models
+- **Gemini 1.5-Flash:** Used for rapid, latency-sensitive responses (e.g., generating the first-person Organ Voice Monologue).
+- **Gemini 2.0-Flash:** Used for advanced reasoning tasks requiring highly structured outputs (e.g., evaluating Urge Modal behavior and generating verified JSON payloads for the CBT engine).
+
+### Key AI Features & Prompt Engineering
+1. **First-Person Organ Monologue:** 
+   - **Mechanism:** The Python backend dynamically concatenates the user's exact ML-predicted damage percentages, missed log days, and randomized research-backed medical facts (WHO/CDC data).
+   - **System Instruction:** The model is role-prompted to speak *as* the organ (e.g., "I am your Heart") giving specific, non-fear-based emotional pleas to cease smoking.
+2. **Cognitive Behavioral 'Urge' Coaching:** 
+   - **Mechanism:** When a user hits the "I have an urge" button, their exact smoking profile is passed to Gemini 2.0. 
+   - **Output:** The LLM strictly generates a JSON payload containing three things: A relatable success story of a similar demographic, the neuroscience of what the brain is feeling *right now*, and an actionable physical distraction technique (like 4-4-6 breathing).
+3. **Weekly Analytics Summary:** The AI assesses the 30-day streak data and generates a natural language breakdown of their financial and health progress.
+
+---
+
+## 5. Localization (i18n) & Sub-Systems
+
+- **Dynamic UI Dictionary Mapping:** A custom React Hook ([useTranslation](file:///c:/Users/Abinaya/OneDrive/Desktop/smoking_habit_tracker/frontend/src/utils/i18n.js#133-146)) intercepts all static strings in the application and bridges them to a dictionary hashmap depending on the Zustand persistent store language variable.
+- **AI-Level Translation Engineering:** If the "Tamil" language preference is detected on the frontend, the Python backend intercepts the Gemini Prompt payload and injects a "CRITICAL INSTRUCTION" to force the LLM to output its native intelligence wholly formulated in Tamil unicode script, bypassing standard translation APIs for much more native dialect reasoning.
